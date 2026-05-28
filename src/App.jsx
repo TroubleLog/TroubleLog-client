@@ -1,10 +1,10 @@
 import { useState } from "react";
 import Sidebar from "./components/Sidebar";
 import Topbar from "./components/Topbar";
-import Step1Code from "./steps/Step1Code";
-import Step2Context from "./steps/Step2Context";
-import Step3QA from "./steps/Step3QA";
-import Step4Report from "./steps/Step4Report";
+import Step1Code from "./pages/steps/Step1Code";
+import Step2Context from "./pages/steps/Step2Context";
+import Step3QA from "./pages/steps/Step3QA";
+import Step4Report from "./pages/steps/Step4Report";
 import LoginPage from "./pages/user/LoginPage";
 import SignUpPage from "./pages/user/SignUpPage";
 import {
