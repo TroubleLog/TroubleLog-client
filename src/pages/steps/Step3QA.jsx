@@ -57,16 +57,6 @@ function QACard({
           </span>
         </div>
         <p className="text-[14px] text-t1 leading-relaxed mb-3">{q.question}</p>
-        <div className="flex flex-wrap gap-1.5">
-          {q.hint.split(",").map((h, hi) => (
-            <span
-              key={hi}
-              className="text-[11px] text-t3 bg-s2 border border-white/5 rounded px-2 py-0.5 font-mono"
-            >
-              {h.trim()}
-            </span>
-          ))}
-        </div>
       </div>
 
       {/* Answer */}

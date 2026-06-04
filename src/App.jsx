@@ -217,17 +217,11 @@ export default function App() {
 function Loading({ isReport }) {
   return (
     <div className="flex flex-col items-center justify-center py-16 text-center">
-      <div className="w-7 h-7 border-2 border-s4 border-t-accent rounded-full animate-spin-fast mb-4" />
+      <div className="w-10 h-10 border-2 border-s4 border-t-accent rounded-full animate-spin-fast mb-4" />
       <p className="text-sm text-t2 mb-1">
-        {isReport
-          ? "트러블슈팅 리포트를 작성하는 중..."
-          : "AI 면접 질문 생성 중..."}
+        {isReport ? "트러블슈팅 리포트 생성 중..." : "AI 면접 질문 생성 중..."}
       </p>
-      <p className="text-xs text-t3">
-        {isReport
-          ? "포트폴리오에 활용 가능한 리포트를 생성합니다."
-          : "기술 의사결정, 트러블슈팅 영역을 분석합니다."}
-      </p>
+      <p className="text-xs text-t3">{isReport ? "" : ""}</p>
     </div>
   );
 }
