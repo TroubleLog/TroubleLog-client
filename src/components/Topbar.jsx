@@ -1,10 +1,13 @@
-import { STEPS_META } from '../data/mockData'
+import { STEPS_META } from "../data/serviceData";
 
 export default function Topbar({ step, user }) {
   return (
-    <div className="h-[52px] border-b border-white/5 bg-s1 flex items-center justify-between px-8 sticky top-0 z-50">
+    <div className="h-[63px] border-b border-white/5 bg-s1 flex items-center justify-between px-8 sticky top-0 z-50">
       <div className="text-[13px] text-t3">
-        TroubleLog / <span className="text-t2 font-medium">{STEPS_META[step - 1]?.name}</span>
+        TroubleLog /{" "}
+        <span className="text-t2 font-medium">
+          {STEPS_META[step - 1]?.name}
+        </span>
       </div>
       <div className="flex items-center gap-2.5">
         {user?.nickname && (
@@ -17,5 +20,5 @@ export default function Topbar({ step, user }) {
         </span>
       </div>
     </div>
-  )
+  );
 }

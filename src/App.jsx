@@ -1,4 +1,13 @@
 import { useState } from "react";
+import {
+  Routes,
+  Route,
+  Navigate,
+  Outlet,
+  useNavigate,
+  useParams,
+  useLocation,
+} from "react-router-dom";
 import Sidebar from "./components/Sidebar";
 import Topbar from "./components/Topbar";
 import Step1Code from "./pages/steps/Step1Code";
@@ -13,7 +22,7 @@ import {
   MOCK_REPORT,
   MOCK_RADAR,
   MOCK_FEEDBACK,
-} from "./data/mockData";
+} from "./data/serviceData";
 import {
   toISO,
   loadHist,
@@ -24,9 +33,7 @@ import {
 } from "./utils/history";
 
 const INIT = {
-  view: "login",
   user: null,
-  step: 1,
   code: MOCK_CODE,
   ctx: { intent: "", alt: "", edge: "" },
   questions: [],
@@ -40,24 +47,141 @@ const INIT = {
   feedbackText: ["", "", ""],
 };
 
+function RequireAuth({ user }) {
+  if (!user) return <Navigate to="/login" replace />;
+  return <Outlet />;
+}
+
+function AppLayout({ user, onLogout }) {
+  const { step } = useParams();
+  const stepNum = Number(step) || 1;
+
+  return (
+    <div className="flex min-h-screen">
+      <Sidebar step={stepNum} user={user} onLogout={onLogout} />
+      <div className="flex-1 min-w-0 flex flex-col">
+        <Topbar step={stepNum} user={user} />
+        <main className="flex-1">
+          <div className="max-w-[780px] mx-auto px-10 py-10 pb-16 w-full">
+            <Outlet />
+          </div>
+        </main>
+      </div>
+    </div>
+  );
+}
+
+function Loading({ isReport }) {
+  return (
+    <div className="flex flex-col items-center justify-center py-16 text-center">
+      <div className="w-10 h-10 border-2 border-s4 border-t-accent rounded-full animate-spin-fast mb-4" />
+      <p className="text-sm text-t2 mb-1">
+        {isReport ? "트러블슈팅 리포트 생성 중..." : "AI 면접 질문 생성 중..."}
+      </p>
+      <p className="text-xs text-t3">{isReport ? "" : ""}</p>
+    </div>
+  );
+}
+
+function StepRoutes({
+  S,
+  upd,
+  genQuestions,
+  genReport,
+  requestFeedback,
+  restart,
+}) {
+  const { step } = useParams();
+  const location = useLocation();
+  const stepNum = Number(step);
+
+  if (S.loading) {
+    return <Loading isReport={location.pathname === "/step/3"} />;
+  }
+
+  switch (stepNum) {
+    case 1:
+      return (
+        <Step1Code
+          code={S.code}
+          error={S.error}
+          onChange={(c) => upd({ code: c, error: "" })}
+          onSetError={(msg) => upd({ error: msg })}
+        />
+      );
+    case 2:
+      return (
+        <Step2Context
+          ctx={S.ctx}
+          error={S.error}
+          onChange={(id, val) =>
+            upd({ ctx: { ...S.ctx, [id]: val }, error: "" })
+          }
+          onSetError={(msg) => upd({ error: msg })}
+          onNext={genQuestions}
+        />
+      );
+    case 3:
+      return (
+        <Step3QA
+          questions={S.questions}
+          answers={S.answers}
+          skipped={S.skipped}
+          feedback={S.feedback}
+          feedbackText={S.feedbackText}
+          error={S.error}
+          onAnswerChange={(i, val) => {
+            const a = [...S.answers];
+            a[i] = val;
+            upd({ answers: a, error: "" });
+          }}
+          onSkip={(i) => {
+            const sk = [...S.skipped];
+            sk[i] = true;
+            upd({ skipped: sk });
+          }}
+          onFeedback={requestFeedback}
+          onNext={genReport}
+        />
+      );
+    case 4:
+      return (
+        <Step4Report
+          report={S.report}
+          radar={S.radar}
+          user={S.user}
+          onRestart={restart}
+        />
+      );
+    default:
+      return <Navigate to="/step/1" replace />;
+  }
+}
+
 export default function App() {
   const [S, setS] = useState(INIT);
+  const navigate = useNavigate();
   const upd = (p) => setS((prev) => ({ ...prev, ...p }));
 
   const login = (email) => {
     const nickname = getNickname(email);
     seedHist(email);
-    upd({ user: { email, nickname }, view: "app", error: "" });
+    upd({ user: { email, nickname }, error: "" });
   };
+
   const register = (email, nickname) => {
     saveNickname(email, nickname);
     seedHist(email);
-    upd({ user: { email, nickname }, view: "app", error: "" });
+    upd({ user: { email, nickname }, error: "" });
   };
-  const logout = () => setS({ ...INIT });
-  const restart = () =>
+
+  const logout = () => {
+    setS({ ...INIT });
+    navigate("/login");
+  };
+
+  const restart = () => {
     upd({
-      step: 1,
       ctx: { intent: "", alt: "", edge: "" },
       questions: [],
       answers: ["", "", ""],
@@ -68,6 +192,7 @@ export default function App() {
       feedback: [null, null, null],
       feedbackText: ["", "", ""],
     });
+  };
 
   const genQuestions = () => {
     if (S.code.trim().length < 20) {
@@ -75,10 +200,10 @@ export default function App() {
       return;
     }
     upd({ loading: true, error: "" });
-    setTimeout(
-      () => upd({ loading: false, questions: MOCK_QUESTIONS, step: 3 }),
-      1800,
-    );
+    setTimeout(() => {
+      upd({ loading: false, questions: MOCK_QUESTIONS });
+      navigate("/step/3");
+    }, 1800);
   };
 
   const genReport = () => {
@@ -97,7 +222,8 @@ export default function App() {
         h.push(today);
         saveHist(S.user?.email, h);
       }
-      upd({ loading: false, report: MOCK_REPORT, radar: MOCK_RADAR, step: 4 });
+      upd({ loading: false, report: MOCK_REPORT, radar: MOCK_RADAR });
+      navigate("/step/4");
     }, 2200);
   };
 
@@ -114,120 +240,29 @@ export default function App() {
     }, 1300);
   };
 
-  if (S.view === "login") {
-    return (
-      <LoginPage
-        onLogin={login}
-        onSwitch={(v) => upd({ view: v, error: "" })}
-      />
-    );
-  }
-  if (S.view === "register") {
-    return (
-      <SignUpPage
-        onRegister={register}
-        onSwitch={(v) => upd({ view: v, error: "" })}
-      />
-    );
-  }
-
-  const renderStep = () => {
-    if (S.loading) return <Loading isReport={S.step === 3} />;
-    switch (S.step) {
-      case 1:
-        return (
-          <Step1Code
-            code={S.code}
-            error={S.error}
-            onChange={(c) => upd({ code: c, error: "" })}
-            onNext={() => {
-              if (S.code.trim().length < 20) {
-                upd({ error: "코드를 20자 이상 입력해주세요." });
-                return;
-              }
-              upd({ step: 2, error: "" });
-            }}
-          />
-        );
-      case 2:
-        return (
-          <Step2Context
-            ctx={S.ctx}
-            error={S.error}
-            onChange={(id, val) =>
-              upd({ ctx: { ...S.ctx, [id]: val }, error: "" })
+  return (
+    <Routes>
+      <Route path="/login" element={<LoginPage onLogin={login} />} />
+      <Route path="/register" element={<SignUpPage onRegister={register} />} />
+      <Route element={<RequireAuth user={S.user} />}>
+        <Route element={<AppLayout user={S.user} onLogout={logout} />}>
+          <Route
+            path="/step/:step"
+            element={
+              <StepRoutes
+                S={S}
+                upd={upd}
+                genQuestions={genQuestions}
+                genReport={genReport}
+                requestFeedback={requestFeedback}
+                restart={restart}
+              />
             }
-            onBack={() => upd({ step: 1, error: "" })}
-            onNext={genQuestions}
           />
-        );
-      case 3:
-        return (
-          <Step3QA
-            questions={S.questions}
-            answers={S.answers}
-            skipped={S.skipped}
-            feedback={S.feedback}
-            feedbackText={S.feedbackText}
-            error={S.error}
-            onAnswerChange={(i, val) => {
-              const a = [...S.answers];
-              a[i] = val;
-              upd({ answers: a, error: "" });
-            }}
-            onSkip={(i) => {
-              const sk = [...S.skipped];
-              sk[i] = true;
-              upd({ skipped: sk });
-            }}
-            onFeedback={requestFeedback}
-            onBack={() => upd({ step: 2, error: "" })}
-            onNext={genReport}
-          />
-        );
-      case 4:
-        return (
-          <Step4Report
-            report={S.report}
-            radar={S.radar}
-            user={S.user}
-            onRestart={restart}
-          />
-        );
-      default:
-        return null;
-    }
-  };
-
-  return (
-    <div className="flex min-h-screen">
-      <Sidebar step={S.step} user={S.user} onLogout={logout} />
-      <div className="flex-1 min-w-0 flex flex-col">
-        <Topbar step={S.step} user={S.user} />
-        <main className="flex-1">
-          <div className="max-w-[780px] mx-auto px-10 py-10 pb-16 w-full">
-            {renderStep()}
-          </div>
-        </main>
-      </div>
-    </div>
-  );
-}
-
-function Loading({ isReport }) {
-  return (
-    <div className="flex flex-col items-center justify-center py-16 text-center">
-      <div className="w-7 h-7 border-2 border-s4 border-t-accent rounded-full animate-spin-fast mb-4" />
-      <p className="text-sm text-t2 mb-1">
-        {isReport
-          ? "트러블슈팅 리포트를 작성하는 중..."
-          : "AI 면접 질문을 생성하는 중..."}
-      </p>
-      <p className="text-xs text-t3">
-        {isReport
-          ? "포트폴리오에 활용 가능한 리포트를 생성합니다."
-          : "기술 의사결정, 트러블슈팅 영역을 분석합니다."}
-      </p>
-    </div>
+        </Route>
+      </Route>
+      <Route path="/" element={<Navigate to="/login" replace />} />
+      <Route path="*" element={<Navigate to="/login" replace />} />
+    </Routes>
   );
 }

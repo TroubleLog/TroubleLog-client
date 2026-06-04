@@ -80,6 +80,6 @@ button {
     @apply text-[22px] font-semibold text-t1 tracking-tight mb-1.5;
   }
   .sec-sub {
-    @apply text-sm text-t2 leading-relaxed max-w-[560px];
+    @apply text-sm text-t2 leading-relaxed max-w-[800px];
   }
 }

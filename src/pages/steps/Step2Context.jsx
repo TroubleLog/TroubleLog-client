@@ -1,4 +1,5 @@
-import { CTX_META } from "../../data/mockData";
+import { useNavigate } from "react-router-dom";
+import { CTX_META } from "../../data/serviceData";
 
 const ErrBar = ({ msg }) =>
   msg ? (
@@ -14,7 +15,9 @@ const ErrBar = ({ msg }) =>
     </div>
   ) : null;
 
-export default function Step2Context({ ctx, error, onChange, onBack, onNext }) {
+export default function Step2Context({ ctx, error, onChange, onNext }) {
+  const navigate = useNavigate();
+
   return (
     <div className="animate-fade-up">
       <div className="mb-8">
@@ -46,13 +49,16 @@ export default function Step2Context({ ctx, error, onChange, onBack, onNext }) {
             <div className="w-6 h-6 rounded-full bg-s3 border border-white/[0.09] text-[11px] font-semibold text-t2 flex items-center justify-center flex-shrink-0">
               {i + 1}
             </div>
-            <span className="text-[13px] font-medium text-t1">{q.label}</span>
+            <span className="text-[16px] font-medium text-t1">{q.label}</span>
             <span className="text-[10px] text-t3 ml-auto bg-s3 rounded px-1.5 py-0.5">
               선택
             </span>
           </div>
+          <div className="text-[14px] text-[#808080] font-medium mb-3">
+            {q.sub}
+          </div>
           <textarea
-            className="w-full min-h-[76px] resize-y bg-s2 border border-white/[0.09] rounded-md px-3.5 py-2.5 text-[13px] leading-relaxed text-t1 outline-none focus:border-white/20 placeholder:text-t3 transition-colors"
+            className="w-full min-h-[76px] resize-y bg-s2 border border-white/[0.09] rounded-md px-3.5 py-2.5 text-[14px] leading-relaxed text-t1 outline-none focus:border-white/20 placeholder:text-t3 transition-colors"
             rows={3}
             placeholder={q.ph}
             value={ctx[q.id]}
@@ -62,7 +68,7 @@ export default function Step2Context({ ctx, error, onChange, onBack, onNext }) {
       ))}
 
       <div className="flex gap-2.5 mt-6">
-        <button className="btn-ghost" onClick={onBack}>
+        <button className="btn-ghost" onClick={() => navigate("/step/1")}>
           ← 이전
         </button>
         <button className="btn-primary flex-1" onClick={onNext}>

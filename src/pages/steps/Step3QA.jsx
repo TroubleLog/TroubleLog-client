@@ -1,9 +1,10 @@
-import { BADGE_TYPE } from "../../data/mockData";
+import { useNavigate } from "react-router-dom";
+import { BADGE_TYPE } from "../../data/serviceData";
 
 const BADGE_STYLE = {
   tech: "text-blue-400 bg-blue-500/10 border-blue-500/25",
   trouble: "text-amber-400 bg-amber-500/10 border-amber-500/25",
-  opt: "text-emerald-400 bg-emerald-500/10 border-emerald-500/25",
+  intent: "text-emerald-400 bg-emerald-500/10 border-emerald-500/25",
 };
 
 const ErrBar = ({ msg }) =>
@@ -48,7 +49,7 @@ function QACard({
       <div className="px-6 py-5 border-b border-white/5">
         <div className="flex items-center gap-2 mb-2.5">
           <span
-            className={`text-[10px] font-semibold px-2.5 py-0.5 rounded-full border ${BADGE_STYLE[badgeKey]}`}
+            className={`text-[12px] font-semibold px-2.5 py-0.5 rounded-full border ${BADGE_STYLE[badgeKey]}`}
           >
             {q.type}
           </span>
@@ -57,16 +58,6 @@ function QACard({
           </span>
         </div>
         <p className="text-[14px] text-t1 leading-relaxed mb-3">{q.question}</p>
-        <div className="flex flex-wrap gap-1.5">
-          {q.hint.split(",").map((h, hi) => (
-            <span
-              key={hi}
-              className="text-[11px] text-t3 bg-s2 border border-white/5 rounded px-2 py-0.5 font-mono"
-            >
-              {h.trim()}
-            </span>
-          ))}
-        </div>
       </div>
 
       {/* Answer */}
@@ -147,9 +138,10 @@ export default function Step3QA({
   onAnswerChange,
   onSkip,
   onFeedback,
-  onBack,
   onNext,
 }) {
+  const navigate = useNavigate();
+
   return (
     <div className="animate-fade-up">
       <div className="mb-8">
@@ -187,7 +179,7 @@ export default function Step3QA({
       ))}
 
       <div className="flex gap-2.5 mt-6">
-        <button className="btn-ghost" onClick={onBack}>
+        <button className="btn-ghost" onClick={() => navigate("/step/2")}>
           ← 이전
         </button>
         <button className="btn-primary flex-1" onClick={onNext}>

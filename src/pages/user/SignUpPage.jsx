@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import Logo from "../../components/Logo";
 
 const ErrMsg = ({ msg }) =>
@@ -15,7 +16,8 @@ const ErrMsg = ({ msg }) =>
     </div>
   ) : null;
 
-export default function SignUpPage({ onRegister, onSwitch }) {
+export default function SignUpPage({ onRegister }) {
+  const navigate = useNavigate();
   const [nick, setNick] = useState("");
   const [email, setEmail] = useState("");
   const [pw, setPw] = useState("");
@@ -41,6 +43,7 @@ export default function SignUpPage({ onRegister, onSwitch }) {
       return;
     }
     onRegister(email, nick);
+    navigate("/step/1");
   };
 
   const fields = [
@@ -132,7 +135,7 @@ export default function SignUpPage({ onRegister, onSwitch }) {
           이미 계정이 있으신가요?{" "}
           <button
             className="text-accent underline underline-offset-2 bg-transparent border-none cursor-pointer ml-2 text-[14px]"
-            onClick={() => onSwitch("register")}
+            onClick={() => navigate("/login")}
           >
             로그인
           </button>
