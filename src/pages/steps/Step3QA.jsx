@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom";
 import { BADGE_TYPE } from "../../data/serviceData";
 
 const BADGE_STYLE = {
@@ -137,9 +138,10 @@ export default function Step3QA({
   onAnswerChange,
   onSkip,
   onFeedback,
-  onBack,
   onNext,
 }) {
+  const navigate = useNavigate();
+
   return (
     <div className="animate-fade-up">
       <div className="mb-8">
@@ -177,7 +179,7 @@ export default function Step3QA({
       ))}
 
       <div className="flex gap-2.5 mt-6">
-        <button className="btn-ghost" onClick={onBack}>
+        <button className="btn-ghost" onClick={() => navigate("/step/2")}>
           ← 이전
         </button>
         <button className="btn-primary flex-1" onClick={onNext}>

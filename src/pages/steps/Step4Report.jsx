@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom";
 import RadarChart from "../../components/RadarChart";
 import GrassCalendar from "../../components/GrassCalendar";
 
@@ -34,6 +35,13 @@ function parseMd(text) {
 }
 
 export default function Step4Report({ report, radar, user, onRestart }) {
+  const navigate = useNavigate();
+
+  const handleRestart = () => {
+    onRestart();
+    navigate("/step/1");
+  };
+
   const copyReport = () => {
     navigator.clipboard.writeText(report).catch(() => {});
   };
@@ -140,7 +148,7 @@ export default function Step4Report({ report, radar, user, onRestart }) {
 
       {/* Restart */}
       <div className="mt-6">
-        <button className="btn-ghost w-full" onClick={onRestart}>
+        <button className="btn-ghost w-full" onClick={handleRestart}>
           ↩ 새 코드로 다시 시작
         </button>
       </div>

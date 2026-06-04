@@ -1,3 +1,5 @@
+import { useNavigate } from "react-router-dom";
+
 const ErrBar = ({ msg }) =>
   msg ? (
     <div className="flex items-start gap-2 bg-[var(--rd)] border border-red-500/25 rounded-md p-3 text-xs text-red-300 mb-5">
@@ -12,7 +14,18 @@ const ErrBar = ({ msg }) =>
     </div>
   ) : null;
 
-export default function Step1Code({ code, error, onChange, onNext }) {
+export default function Step1Code({ code, error, onChange, onSetError }) {
+  const navigate = useNavigate();
+
+  const handleNext = () => {
+    if (code.trim().length < 20) {
+      onSetError("코드를 20자 이상 입력해주세요.");
+      return;
+    }
+    onSetError("");
+    navigate("/step/2");
+  };
+
   return (
     <div className="animate-fade-up">
       <div className="mb-8">
@@ -61,7 +74,7 @@ export default function Step1Code({ code, error, onChange, onNext }) {
       </div>
 
       <div className="flex gap-2.5 mt-6">
-        <button className="btn-primary flex-1" onClick={onNext}>
+        <button className="btn-primary flex-1" onClick={handleNext}>
           다음 — 컨텍스트 입력 →
         </button>
       </div>

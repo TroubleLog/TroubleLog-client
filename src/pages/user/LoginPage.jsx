@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import Logo from "../../components/Logo";
 
 const ErrMsg = ({ msg }) =>
@@ -15,7 +16,8 @@ const ErrMsg = ({ msg }) =>
     </div>
   ) : null;
 
-export default function LoginPage({ onLogin, onSwitch }) {
+export default function LoginPage({ onLogin }) {
+  const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [pw, setPw] = useState("");
   const [err, setErr] = useState("");
@@ -30,6 +32,7 @@ export default function LoginPage({ onLogin, onSwitch }) {
       return;
     }
     onLogin(email);
+    navigate("/step/1");
   };
 
   return (
@@ -89,7 +92,7 @@ export default function LoginPage({ onLogin, onSwitch }) {
           계정이 없으신가요?
           <button
             className="text-accent underline underline-offset-2 bg-transparent border-none cursor-pointer ml-2 text-[14px]"
-            onClick={() => onSwitch("register")}
+            onClick={() => navigate("/register")}
           >
             회원가입
           </button>

@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom";
 import { CTX_META } from "../../data/serviceData";
 
 const ErrBar = ({ msg }) =>
@@ -14,7 +15,9 @@ const ErrBar = ({ msg }) =>
     </div>
   ) : null;
 
-export default function Step2Context({ ctx, error, onChange, onBack, onNext }) {
+export default function Step2Context({ ctx, error, onChange, onNext }) {
+  const navigate = useNavigate();
+
   return (
     <div className="animate-fade-up">
       <div className="mb-8">
@@ -65,7 +68,7 @@ export default function Step2Context({ ctx, error, onChange, onBack, onNext }) {
       ))}
 
       <div className="flex gap-2.5 mt-6">
-        <button className="btn-ghost" onClick={onBack}>
+        <button className="btn-ghost" onClick={() => navigate("/step/1")}>
           ← 이전
         </button>
         <button className="btn-primary flex-1" onClick={onNext}>
