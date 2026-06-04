@@ -1,3 +1,4 @@
+import LogoIcon from "../assets/images/logo-icon.svg";
 import { STEPS_META } from "../data/serviceData";
 
 const LogoutIcon = () => (
@@ -27,8 +28,9 @@ export default function Sidebar({ step, user, onLogout }) {
     <aside className="w-[250px] flex-shrink-0 border-r border-white/5 bg-s1 flex flex-col sticky top-0 h-screen">
       {/* Logo */}
       <div className="px-4 py-4 border-b border-white/5">
-        <div className="flex items-center gap-2.5">
-          <span className="text-[#23C363] text-[20px] font-semibold text-t1 tracking-tight">
+        <div className="flex items-center gap-2">
+          <img src={LogoIcon} className="w-6 h-6" />
+          <span className="text-[#23C360] text-[20px] font-semibold text-t1 tracking-tight">
             TroubleLog
           </span>
         </div>

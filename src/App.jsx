@@ -13,7 +13,7 @@ import {
   MOCK_REPORT,
   MOCK_RADAR,
   MOCK_FEEDBACK,
-} from "./data/mockData";
+} from "./data/serviceData";
 import {
   toISO,
   loadHist,
@@ -221,7 +221,7 @@ function Loading({ isReport }) {
       <p className="text-sm text-t2 mb-1">
         {isReport
           ? "트러블슈팅 리포트를 작성하는 중..."
-          : "AI 면접 질문을 생성하는 중..."}
+          : "AI 면접 질문 생성 중..."}
       </p>
       <p className="text-xs text-t3">
         {isReport

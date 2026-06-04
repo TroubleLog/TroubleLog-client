@@ -1,4 +1,4 @@
-import { BADGE_TYPE } from "../../data/mockData";
+import { BADGE_TYPE } from "../../data/serviceData";
 
 const BADGE_STYLE = {
   tech: "text-blue-400 bg-blue-500/10 border-blue-500/25",
