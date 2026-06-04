@@ -54,7 +54,7 @@ export default function Step2Context({ ctx, error, onChange, onNext }) {
               선택
             </span>
           </div>
-          <div className="text-[14px] text-[#808080] font-medium text-t1 mb-3">
+          <div className="text-[14px] text-[#808080] font-medium mb-3">
             {q.sub}
           </div>
           <textarea

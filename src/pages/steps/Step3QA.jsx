@@ -4,7 +4,7 @@ import { BADGE_TYPE } from "../../data/serviceData";
 const BADGE_STYLE = {
   tech: "text-blue-400 bg-blue-500/10 border-blue-500/25",
   trouble: "text-amber-400 bg-amber-500/10 border-amber-500/25",
-  opt: "text-emerald-400 bg-emerald-500/10 border-emerald-500/25",
+  intent: "text-emerald-400 bg-emerald-500/10 border-emerald-500/25",
 };
 
 const ErrBar = ({ msg }) =>
@@ -49,7 +49,7 @@ function QACard({
       <div className="px-6 py-5 border-b border-white/5">
         <div className="flex items-center gap-2 mb-2.5">
           <span
-            className={`text-[10px] font-semibold px-2.5 py-0.5 rounded-full border ${BADGE_STYLE[badgeKey]}`}
+            className={`text-[12px] font-semibold px-2.5 py-0.5 rounded-full border ${BADGE_STYLE[badgeKey]}`}
           >
             {q.type}
           </span>

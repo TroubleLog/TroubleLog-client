@@ -30,7 +30,7 @@ export default function Sidebar({ step, user, onLogout }) {
       <div className="px-4 py-4 border-b border-white/5">
         <div className="flex items-center gap-2">
           <img src={LogoIcon} className="w-6 h-6" />
-          <span className="text-[#23C360] text-[20px] font-semibold text-t1 tracking-tight">
+          <span className="text-[#23C360] text-[20px] font-semibold tracking-tight">
             TroubleLog
           </span>
         </div>

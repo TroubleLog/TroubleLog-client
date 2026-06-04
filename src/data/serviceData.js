@@ -1,25 +1,3 @@
-/*
-1. 기능 설명
-
-어떤 기능을 수행하는 코드인가요?
-(예: 로그인/회원가입, 게시판 CRUD 등)
-
-2. 예외 처리
-
-어떤 예외 상황을 고려했나요?
-(예: 과거 날짜 예약 방지, 중복 데이터 처리 등)
-
-3. 기술 선택 이유
-
-이 프로젝트에서 사용한 기술 스택 중 직접 선택한 것이 있다면, 왜 그 기술을 골랐나요?
-(예: 라이브러리, 프레임워크, DB, 디자인 패턴 등)
-
-4. 프로젝트 규모 및 기간
-
-프로젝트 팀 규모와 구현 기간이 어떻게 되나요?
-(예: 4인 개발팀, 3주)
-*/
-
 export const STEPS_META = [
   { name: "코드 제출", desc: "핵심 로직 코드 입력" },
   { name: "컨텍스트 입력", desc: "설계 의도 및 배경 수집" },
@@ -54,8 +32,8 @@ export const CTX_META = [
 ];
 export const BADGE_TYPE = {
   "기술 의사결정": "tech",
-  트러블슈팅: "trouble",
-  "최적화 경험": "opt",
+  "트러블슈팅": "trouble",
+  "설계 의도": "intent",
 };
 export const MOCK_CODE = `async function processOrder(orderId, userId) {
   const order = await db.orders.findById(orderId);
@@ -91,7 +69,7 @@ export const MOCK_QUESTIONS = [
     hint: "부분 실패, 보상 트랜잭션, 롤백 전략",
   },
   {
-    type: "최적화 경험",
+    type: "설계 의도",
     question:
       "동시에 수천 건의 주문이 들어오는 상황을 가정할 때, 현재 구조에서 예상되는 병목 지점은 어디인가요? 어떤 방식으로 개선할 수 있을지 설명해주세요.",
     hint: "DB connection pool, 낙관적 잠금, 큐 기반 처리",
