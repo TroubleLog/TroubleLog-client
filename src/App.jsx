@@ -35,7 +35,7 @@ import { logout as logoutApi, createProject, submitPreContext, submitInterview, 
 const INIT = {
   user: null,
   code: MOCK_CODE,
-  ctx: { intent: "", alt: "", edge: "" },
+  ctx: { intent: "", alt: "", edge: "", scale: "" },
   questions: [],
   answers: ["", "", ""],
   skipped: [false, false, false],
@@ -45,6 +45,7 @@ const INIT = {
   error: "",
   feedback: [null, null, null],
   feedbackText: ["", "", ""],
+  sessionId: null
 };
 
 function RequireAuth({ user }) {
@@ -187,7 +188,7 @@ export default function App() {
 
   const restart = () => {
     upd({
-      ctx: { intent: "", alt: "", edge: "" },
+      ctx: { intent: "", alt: "", edge: "", scale: "" },
       questions: [],
       answers: ["", "", ""],
       skipped: [false, false, false],
