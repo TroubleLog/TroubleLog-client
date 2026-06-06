@@ -43,8 +43,8 @@ export default function Step2Context({ ctx, error, onChange, onNext, piiWarning,
         </span>
         <h2 className="sec-title">개발 배경을 알려주세요</h2>
         <p className="sec-sub">
-          코드만으로 파악하기 어려운 의사결정 배경을 수집합니다. 모두 선택
-          사항이며, 입력할수록 질문의 깊이가 달라집니다.
+          코드만으로 파악하기 어려운 의사결정 배경을 수집합니다.<br/>
+          모두 선택 사항이며, 입력할수록 질문의 깊이가 달라집니다.
         </p>
       </div>
 

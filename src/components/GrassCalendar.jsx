@@ -12,7 +12,7 @@ export default function GrassCalendar({ email }) {
   const thisSun = new Date(today)
   thisSun.setDate(today.getDate() - today.getDay())
   const start = new Date(thisSun)
-  start.setDate(start.getDate() - 51 * 7)
+  start.setDate(start.getDate() - 49 * 7)
 
   const weeks = []
   for (let w = 0; w < 52; w++) {

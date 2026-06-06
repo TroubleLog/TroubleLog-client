@@ -271,13 +271,13 @@ export default function App() {
 
       const { report, radarScore } = await generateReport({ sessionId: S.sessionId });
 
-      const radar = [
+      const radar = radarScore ? [
         { label: "문제해결", val: radarScore.problemSolving },
         { label: "기술 판단력", val: radarScore.techJudgment },
         { label: "코드 신뢰성", val: radarScore.codeReliability },
         { label: "커뮤니케이션", val: radarScore.communication },
         { label: "설계 사고력", val: radarScore.designThinking },
-      ];
+      ] : null;
 
       const today = toISO(new Date());
       const h = loadHist(S.user?.email);
