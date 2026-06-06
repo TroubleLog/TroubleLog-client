@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Logo from "../../components/Logo";
+import { signup } from "../../utils/api";
 
 const ErrMsg = ({ msg }) =>
   msg ? (
@@ -24,14 +25,19 @@ export default function SignUpPage({ onRegister }) {
   const [pwc, setPwc] = useState("");
   const [agree, setAgree] = useState(false);
   const [err, setErr] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const submit = () => {
+  const submit = async () => {
     if (!nick) {
       setErr("닉네임을 입력해주세요.");
       return;
     }
     if (!email.includes("@")) {
       setErr("올바른 이메일 형식을 입력해주세요.");
+      return;
+    }
+    if (pw.length < 8) {
+      setErr("비밀번호를 8자 이상 입력해주세요.");
       return;
     }
     if (pw !== pwc) {
@@ -42,8 +48,22 @@ export default function SignUpPage({ onRegister }) {
       setErr("개인정보 수집 및 활용에 동의해주세요.");
       return;
     }
-    onRegister(email, nick);
-    navigate("/step/1");
+
+    setErr("");
+    setLoading(true);
+    try {
+      const data = await signup({
+        email,
+        password: pw,
+        username: nick,
+      });
+      onRegister(data.email, data.username);
+      navigate("/step/1");
+    } catch (e) {
+      setErr(e.message || "회원가입에 실패했습니다. 다시 시도해주세요.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const fields = [
@@ -126,7 +146,11 @@ export default function SignUpPage({ onRegister }) {
         <ErrMsg msg={err} />
 
         {/* 회원가입 버튼 */}
-        <button className="btn-primary w-full" onClick={submit}>
+        <button
+          className="btn-primary w-full disabled:opacity-50 disabled:cursor-not-allowed"
+          onClick={submit}
+          disabled={loading}
+        >
           회원가입
         </button>
 
