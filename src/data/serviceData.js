@@ -24,16 +24,16 @@ export const CTX_META = [
     ph: "예시) 라이브러리, 프레임워크, DB, 디자인 패턴 등",
   },
   {
-    id: "edge",
+    id: "scale",
     label: "프로젝트 규모 및 기간",
     sub: "프로젝트 팀 규모와 구현 기간이 어떻게 되나요?",
     ph: "예시) 4인 개발팀, 3주",
   },
 ];
 export const BADGE_TYPE = {
-  "기술 의사결정": "tech",
-  "트러블슈팅": "trouble",
-  "설계 의도": "intent",
+  1: { key: "tech", label: "기술 의사결정" },
+  2: { key: "trouble", label: "트러블슈팅" },
+  3: { key: "intent", label: "설계 의도" },
 };
 export const MOCK_CODE = `async function processOrder(orderId, userId) {
   const order = await db.orders.findById(orderId);

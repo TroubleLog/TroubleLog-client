@@ -30,12 +30,12 @@ import {
   seedHist,
   saveNickname,
 } from "./utils/history";
-import { logout as logoutApi } from "./utils/api";
+import { logout as logoutApi, createProject, submitPreContext, submitInterview, generateReport, submitAnswer } from "./utils/api";
 
 const INIT = {
   user: null,
   code: MOCK_CODE,
-  ctx: { intent: "", alt: "", edge: "" },
+  ctx: { intent: "", alt: "", edge: "", scale: "" },
   questions: [],
   answers: ["", "", ""],
   skipped: [false, false, false],
@@ -45,6 +45,8 @@ const INIT = {
   error: "",
   feedback: [null, null, null],
   feedbackText: ["", "", ""],
+  sessionId: null,
+  piiWarning: null,
 };
 
 function RequireAuth({ user }) {
@@ -119,6 +121,8 @@ function StepRoutes({
           }
           onSetError={(msg) => upd({ error: msg })}
           onNext={genQuestions}
+          piiWarning={S.piiWarning}
+          onClearPiiWarning={() => upd({ piiWarning: null })}
         />
       );
     case 3:
@@ -163,16 +167,16 @@ export default function App() {
   const navigate = useNavigate();
   const upd = (p) => setS((prev) => ({ ...prev, ...p }));
 
-  const login = (email, nickname) => {
+  const login = (email, nickname, memberId) => {
     saveNickname(email, nickname);
     seedHist(email);
-    upd({ user: { email, nickname }, error: "" });
+    upd({ user: { email, nickname, memberId }, error: "" });
   };
 
-  const register = (email, nickname) => {
+  const register = (email, nickname, memberId) => {
     saveNickname(email, nickname);
     seedHist(email);
-    upd({ user: { email, nickname }, error: "" });
+    upd({ user: { email, nickname, memberId }, error: "" });
   };
 
   const logout = async () => {
@@ -187,7 +191,7 @@ export default function App() {
 
   const restart = () => {
     upd({
-      ctx: { intent: "", alt: "", edge: "" },
+      ctx: { intent: "", alt: "", edge: "", scale: "" },
       questions: [],
       answers: ["", "", ""],
       skipped: [false, false, false],
@@ -199,50 +203,116 @@ export default function App() {
     });
   };
 
-  const genQuestions = () => {
+  const genQuestions = async () => {
     if (S.code.trim().length < 20) {
       upd({ error: "코드를 20자 이상 입력해주세요." });
       return;
     }
     upd({ loading: true, error: "" });
-    setTimeout(() => {
-      upd({ loading: false, questions: MOCK_QUESTIONS });
+    try {
+      const projectRes = await createProject({
+        memberId: S.user.memberId,
+        codeContent: S.code,
+        githubUrl: "",
+      });
+
+      if (projectRes.blockedReason) {
+        const typeMap = {
+          EMAIL: "이메일 주소",
+          PHONE_NUMBER: "전화번호",
+          PHONE: "전화번호",
+          SSN: "주민등록번호",
+          RESIDENT_REGISTRATION_NUMBER: "주민등록번호",
+        };
+        const detected = projectRes.warnings.map(w => typeMap[w.type] || w.type).join(', ');
+        upd({ 
+          loading: false, 
+          piiWarning: `코드에 개인정보(${detected})가 포함되어 있어요. 해당 정보를 제거한 후 다시 시도해주세요.` 
+        });
+        return;
+      }
+
+      const { sessionId } = projectRes;
+
+      const { questions } = await submitPreContext({
+        memberId: S.user.memberId,
+        sessionId,
+        codePurpose: S.ctx.intent,
+        techRationale: S.ctx.alt,
+        exceptionHandling: S.ctx.edge,
+        projectScale: S.ctx.scale ?? "",
+      });
+
+      upd({ loading: false, questions, sessionId });
       navigate("/step/3");
-    }, 1800);
+    } catch (e) {
+      upd({ loading: false, error: e.message });
+    }
   };
 
-  const genReport = () => {
-    const valid = S.answers.filter(
-      (a, i) => !S.skipped[i] && a.trim().length >= 10,
-    );
+  const genReport = async () => {
+    const valid = S.answers.filter((a, i) => !S.skipped[i] && a.trim().length >= 10);
     if (!valid.length) {
       upd({ error: "최소 1개 질문에 10자 이상 답변을 입력해주세요." });
       return;
     }
     upd({ loading: true, error: "" });
-    setTimeout(() => {
+    try {
+      const answers = S.questions.map((q, i) => ({
+        questionId: q.questionId,
+        answer: S.skipped[i] ? "" : S.answers[i],
+      }));
+
+      await submitInterview({
+        sessionId: S.sessionId,
+        memberId: S.user.memberId,
+        answers,
+      });
+
+      const { report, radarScore } = await generateReport({ sessionId: S.sessionId });
+
+      const radar = [
+        { label: "문제해결", val: radarScore.problemSolving },
+        { label: "기술 판단력", val: radarScore.techJudgment },
+        { label: "코드 신뢰성", val: radarScore.codeReliability },
+        { label: "커뮤니케이션", val: radarScore.communication },
+        { label: "설계 사고력", val: radarScore.designThinking },
+      ];
+
       const today = toISO(new Date());
       const h = loadHist(S.user?.email);
-      if (!h.includes(today)) {
-        h.push(today);
-        saveHist(S.user?.email, h);
-      }
-      upd({ loading: false, report: MOCK_REPORT, radar: MOCK_RADAR });
+      h[today] = (h[today] || 0) + 1;
+      saveHist(S.user?.email, h);
+
+      upd({ loading: false, report, radar });
       navigate("/step/4");
-    }, 2200);
+    } catch (e) {
+      upd({ loading: false, error: e.message });
+    }
   };
 
-  const requestFeedback = (i) => {
+  const requestFeedback = async (i) => {
     const fb = [...S.feedback];
     fb[i] = "loading";
     upd({ feedback: fb });
-    setTimeout(() => {
-      const fb2 = [...S.feedback],
-        ft = [...S.feedbackText];
+    try {
+      const questionId = S.questions[i].questionId;
+      const data = await submitAnswer({
+        sessionId: S.sessionId,
+        questionId,
+        memberId: S.user.memberId,
+        answer: S.answers[i],
+      });
+
+      const fb2 = [...S.feedback], ft = [...S.feedbackText];
       fb2[i] = "shown";
-      ft[i] = MOCK_FEEDBACK[i] || "";
+      ft[i] = data.improvement || "";
       upd({ feedback: fb2, feedbackText: ft });
-    }, 1300);
+    } catch (e) {
+      const fb2 = [...S.feedback];
+      fb2[i] = null;
+      upd({ feedback: fb2, error: e.message });
+    }
   };
 
   return (

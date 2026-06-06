@@ -15,11 +15,21 @@ const ErrBar = ({ msg }) =>
     </div>
   ) : null;
 
-export default function Step2Context({ ctx, error, onChange, onNext }) {
+export default function Step2Context({ ctx, error, onChange, onNext, piiWarning, onClearPiiWarning }) {
   const navigate = useNavigate();
 
   return (
     <div className="animate-fade-up">
+      {piiWarning && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+          <div className="bg-s1 border border-white/[0.09] rounded-xl p-6 max-w-[380px] w-full mx-4">
+            <h3 className="text-[16px] font-semibold text-t1 mb-2">🔒 개인정보가 감지되었어요</h3>
+            <p className="text-[13px] text-t2 leading-relaxed mb-5">{piiWarning}</p>
+            <button className="btn-primary w-full" onClick={() => { onClearPiiWarning(); navigate("/step/1"); }}> 확인
+            </button>
+          </div>
+        </div>
+      )}
       <div className="mb-8">
         <span className="sec-tag">
           <svg
@@ -33,8 +43,8 @@ export default function Step2Context({ ctx, error, onChange, onNext }) {
         </span>
         <h2 className="sec-title">개발 배경을 알려주세요</h2>
         <p className="sec-sub">
-          코드만으로 파악하기 어려운 의사결정 배경을 수집합니다. 모두 선택
-          사항이며, 입력할수록 질문의 깊이가 달라집니다.
+          코드만으로 파악하기 어려운 의사결정 배경을 수집합니다.<br/>
+          모두 선택 사항이며, 입력할수록 질문의 깊이가 달라집니다.
         </p>
       </div>
 

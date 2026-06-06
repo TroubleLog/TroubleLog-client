@@ -4,7 +4,6 @@ const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov
 
 export default function GrassCalendar({ email }) {
   const hist = loadHist(email)
-  const hSet = new Set(hist)
   const today = new Date(); today.setHours(0, 0, 0, 0)
   const todayISO = toISO(today)
 
@@ -12,10 +11,10 @@ export default function GrassCalendar({ email }) {
   const thisSun = new Date(today)
   thisSun.setDate(today.getDate() - today.getDay())
   const start = new Date(thisSun)
-  start.setDate(start.getDate() - 51 * 7)
+  start.setDate(start.getDate() - 40 * 7)
 
   const weeks = []
-  for (let w = 0; w < 52; w++) {
+  for (let w = 0; w < 41; w++) {
     const week = []
     for (let d = 0; d < 7; d++) {
       const dt = new Date(start)
@@ -33,7 +32,7 @@ export default function GrassCalendar({ email }) {
   })
 
   const CT = 14 // cell(11) + gap(3)
-  const totalSubs = hist.filter(d => { const dt = new Date(d); return !isNaN(dt) && dt >= start && dt <= today }).length
+  const totalSubs = Object.entries(hist).filter(([d]) => { const dt = new Date(d); return !isNaN(dt) && dt >= start && dt <= today }).reduce((sum, [, cnt]) => sum + cnt, 0)
 
   return (
     <div className="bg-s1 border border-white/5 rounded-lg p-6 mt-6">
@@ -60,13 +59,18 @@ export default function GrassCalendar({ email }) {
                 {wk.map((d, di) => {
                   if (d === null) return <div key={di} className="w-[11px] h-[11px] rounded-[2px] bg-s3 opacity-15" />
                   const iso = toISO(d)
-                  const active = hSet.has(iso)
+                  const count = hist[iso] || 0
                   const isToday = iso === todayISO
                   return (
                     <div
                       key={di}
                       title={iso}
-                      className={`w-[11px] h-[11px] rounded-[2px] transition-opacity ${active ? 'bg-accent hover:opacity-80' : 'bg-s3'}`}
+                      className={`w-[11px] h-[11px] rounded-[2px] transition-opacity ${
+                        count === 0 ? 'bg-s3' :
+                        count === 1 ? 'bg-accent opacity-35' :
+                        count === 2 ? 'bg-accent opacity-65' :
+                        'bg-accent'
+                      }`}
                       style={isToday ? { outline: '2px solid #22C55E', outlineOffset: '1px', borderRadius: '3px' } : {}}
                     />
                   )
