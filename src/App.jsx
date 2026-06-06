@@ -28,7 +28,6 @@ import {
   loadHist,
   saveHist,
   seedHist,
-  getNickname,
   saveNickname,
 } from "./utils/history";
 import { logout as logoutApi } from "./utils/api";
@@ -164,8 +163,8 @@ export default function App() {
   const navigate = useNavigate();
   const upd = (p) => setS((prev) => ({ ...prev, ...p }));
 
-  const login = (email) => {
-    const nickname = getNickname(email);
+  const login = (email, nickname) => {
+    saveNickname(email, nickname);
     seedHist(email);
     upd({ user: { email, nickname }, error: "" });
   };
