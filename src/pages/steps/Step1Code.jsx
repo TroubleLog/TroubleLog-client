@@ -1,4 +1,52 @@
+import { useState, useRef, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
+import CodeMirror from "@uiw/react-codemirror";
+import { javascript } from "@codemirror/lang-javascript";
+import { java } from "@codemirror/lang-java";
+import { python } from "@codemirror/lang-python";
+import { EditorView } from "@codemirror/view";
+import { oneDark } from "@codemirror/theme-one-dark";
+
+const LANG_OPTIONS = [
+  { id: "javascript", label: "JavaScript", ext: () => javascript() },
+  {
+    id: "typescript",
+    label: "TypeScript",
+    ext: () => javascript({ typescript: true }),
+  },
+  { id: "java", label: "Java", ext: () => java() },
+  { id: "python", label: "Python", ext: () => python() },
+];
+
+const editorTheme = EditorView.theme({
+  "&": {
+    backgroundColor: "#18181C",
+    fontSize: "12.5px",
+  },
+  ".cm-scroller": {
+    fontFamily: '"JetBrains Mono", "Fira Code", monospace',
+    lineHeight: "1.75",
+  },
+  ".cm-content": {
+    padding: "16px 12px 16px 0",
+    caretColor: "#22C55E",
+  },
+  ".cm-gutters": {
+    backgroundColor: "#18181C",
+    border: "none",
+    color: "#55555F",
+    paddingLeft: "8px",
+  },
+  ".cm-activeLineGutter": {
+    backgroundColor: "rgba(255,255,255,0.03)",
+  },
+  ".cm-activeLine": {
+    backgroundColor: "rgba(255,255,255,0.03)",
+  },
+  "&.cm-focused .cm-selectionBackground, .cm-selectionBackground": {
+    backgroundColor: "rgba(34, 197, 94, 0.2) !important",
+  },
+});
 
 const ErrBar = ({ msg }) =>
   msg ? (
@@ -14,8 +62,71 @@ const ErrBar = ({ msg }) =>
     </div>
   ) : null;
 
+function LangDropdown({ value, onChange }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+  const selected = LANG_OPTIONS.find((o) => o.id === value);
+
+  useEffect(() => {
+    const handleClick = (e) => {
+      if (ref.current && !ref.current.contains(e.target)) setOpen(false);
+    };
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, []);
+
+  return (
+    <div ref={ref} className="relative">
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        className="flex items-center gap-1 font-mono text-[10px] text-t2 hover:text-t1 transition-colors px-1.5 py-0.5 rounded hover:bg-white/[0.05]"
+        aria-haspopup="listbox"
+        aria-expanded={open}
+      >
+        {selected?.label}
+        <svg
+          className={`w-2.5 h-2.5 stroke-current fill-none stroke-2 transition-transform ${open ? "rotate-180" : ""}`}
+          viewBox="0 0 12 12"
+        >
+          <path d="M3 4.5L6 7.5L9 4.5" />
+        </svg>
+      </button>
+      {open && (
+        <ul
+          role="listbox"
+          className="absolute right-0 top-full mt-1 min-w-[120px] bg-s3 border border-white/[0.09] rounded-md py-1 shadow-lg z-10"
+        >
+          {LANG_OPTIONS.map((opt) => (
+            <li key={opt.id} role="option" aria-selected={opt.id === value}>
+              <button
+                type="button"
+                onClick={() => {
+                  onChange(opt.id);
+                  setOpen(false);
+                }}
+                className={`w-full text-left px-3 py-1.5 font-mono text-[10px] transition-colors hover:bg-white/[0.06] ${
+                  opt.id === value ? "text-accent" : "text-t2 hover:text-t1"
+                }`}
+              >
+                {opt.label}
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
 export default function Step1Code({ code, error, onChange, onSetError }) {
   const navigate = useNavigate();
+  const [language, setLanguage] = useState("javascript");
+
+  const extensions = useMemo(() => {
+    const lang = LANG_OPTIONS.find((o) => o.id === language);
+    return [lang.ext(), oneDark, editorTheme, EditorView.lineWrapping];
+  }, [language]);
 
   const handleNext = () => {
     if (code.trim().length < 20) {
@@ -48,22 +159,38 @@ export default function Step1Code({ code, error, onChange, onSetError }) {
       <ErrBar msg={error} />
 
       {/* Code Editor */}
-      <div>
-        <div className="bg-s2 border border-white/[0.09] border-b-0 rounded-t-md px-3.5 py-2 flex items-center justify-between">
+      <div
+        className="
+          border border-white/[0.09]
+          rounded-md
+          overflow-hidden
+          transition-colors
+          focus-within:border-accent
+          focus-within:shadow-[0_0_0_1px_#22C55E]
+        "
+      >
+        <div className="bg-s2 px-3.5 py-2 flex items-center justify-between border-b border-white/[0.09]">
           <div className="flex gap-1.5">
             <div className="w-2.5 h-2.5 rounded-full bg-[#FF5F57]" />
             <div className="w-2.5 h-2.5 rounded-full bg-[#FFBD2E]" />
             <div className="w-2.5 h-2.5 rounded-full bg-[#28CA41]" />
           </div>
-          <span className="font-mono text-[10px] text-t3">
-            JavaScript / TypeScript
-          </span>
+
+          <LangDropdown value={language} onChange={setLanguage} />
         </div>
-        <textarea
-          className="w-full min-h-[260px] resize-y bg-s2 border border-white/[0.09] border-t-0 rounded-b-md px-5 py-4 font-mono text-[12.5px] leading-7 text-t1 outline-none focus:border-accent focus:shadow-[inset_0_0_0_1px_#22C55E] tab-size-2"
-          spellCheck="false"
+
+        <CodeMirror
           value={code}
-          onChange={(e) => onChange(e.target.value)}
+          height="260px"
+          theme={oneDark}
+          extensions={extensions}
+          onChange={onChange}
+          basicSetup={{
+            lineNumbers: true,
+            foldGutter: false,
+            highlightActiveLine: true,
+            autocompletion: false,
+          }}
         />
       </div>
       <div className="flex justify-between items-center mt-2">

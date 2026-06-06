@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Logo from "../../components/Logo";
+import { login as loginApi } from "../../utils/api";
 
 const ErrMsg = ({ msg }) =>
   msg ? (
@@ -21,8 +22,9 @@ export default function LoginPage({ onLogin }) {
   const [email, setEmail] = useState("");
   const [pw, setPw] = useState("");
   const [err, setErr] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const submit = () => {
+  const submit = async () => {
     if (!email || !pw) {
       setErr("이메일과 비밀번호를 입력해주세요.");
       return;
@@ -31,8 +33,18 @@ export default function LoginPage({ onLogin }) {
       setErr("올바른 이메일 형식을 입력해주세요.");
       return;
     }
-    onLogin(email);
-    navigate("/step/1");
+
+    setErr("");
+    setLoading(true);
+    try {
+      const data = await loginApi({ email, password: pw });
+      onLogin(data.email, data.username);
+      navigate("/step/1");
+    } catch (e) {
+      setErr("이메일 또는 비밀번호가 일치하지 않습니다." || e.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -83,7 +95,11 @@ export default function LoginPage({ onLogin }) {
         <ErrMsg msg={err} />
 
         {/* 로그인 버튼 */}
-        <button className="btn-primary w-full" onClick={submit}>
+        <button
+          className="btn-primary w-full disabled:opacity-50 disabled:cursor-not-allowed"
+          onClick={submit}
+          disabled={loading}
+        >
           로그인
         </button>
 

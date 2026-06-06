@@ -10,14 +10,14 @@ export default function Topbar({ step, user }) {
         </span>
       </div>
       <div className="flex items-center gap-2.5">
+        <span className="text-[11px] text-t2 bg-s2 border border-white/[0.09] rounded-sm px-2.5 py-[3px]">
+          Step {step} / 4
+        </span>
         {user?.nickname && (
           <span className="text-[11px] text-t2 bg-s2 border border-white/[0.09] rounded-sm px-2.5 py-[3px]">
             {user.nickname}
           </span>
         )}
-        <span className="text-[11px] text-t2 bg-s2 border border-white/[0.09] rounded-sm px-2.5 py-[3px]">
-          Step {step} / 4
-        </span>
       </div>
     </div>
   );

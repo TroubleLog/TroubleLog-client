@@ -28,9 +28,9 @@ import {
   loadHist,
   saveHist,
   seedHist,
-  getNickname,
   saveNickname,
 } from "./utils/history";
+import { logout as logoutApi } from "./utils/api";
 
 const INIT = {
   user: null,
@@ -163,8 +163,8 @@ export default function App() {
   const navigate = useNavigate();
   const upd = (p) => setS((prev) => ({ ...prev, ...p }));
 
-  const login = (email) => {
-    const nickname = getNickname(email);
+  const login = (email, nickname) => {
+    saveNickname(email, nickname);
     seedHist(email);
     upd({ user: { email, nickname }, error: "" });
   };
@@ -175,7 +175,12 @@ export default function App() {
     upd({ user: { email, nickname }, error: "" });
   };
 
-  const logout = () => {
+  const logout = async () => {
+    try {
+      await logoutApi();
+    } catch {
+      // 서버 로그아웃 실패 시에도 로컬 세션 정리
+    }
     setS({ ...INIT });
     navigate("/login");
   };
