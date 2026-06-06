@@ -45,7 +45,8 @@ const INIT = {
   error: "",
   feedback: [null, null, null],
   feedbackText: ["", "", ""],
-  sessionId: null
+  sessionId: null,
+  piiWarning: null,
 };
 
 function RequireAuth({ user }) {
@@ -143,6 +144,8 @@ function StepRoutes({
           }}
           onFeedback={requestFeedback}
           onNext={genReport}
+          piiWarning={S.piiWarning}
+          onClearPiiWarning={() => upd({ piiWarning: null })}
         />
       );
     case 4:
@@ -242,11 +245,16 @@ export default function App() {
         answer: S.skipped[i] ? "" : S.answers[i],
       }));
 
-      await submitInterview({
+      const submitRes = await submitInterview({
         sessionId: S.sessionId,
         memberId: S.user.memberId,
         answers,
       });
+
+      if (!submitRes.reportGenerationReady) {
+        upd({ loading: false, piiWarning: submitRes.blockedReason || "개인정보가 감지되었습니다. 코드나 답변을 수정해주세요." });
+        return;
+      }
 
       const { report, radarScore } = await generateReport({ sessionId: S.sessionId });
 
