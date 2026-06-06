@@ -30,7 +30,7 @@ import {
   seedHist,
   saveNickname,
 } from "./utils/history";
-import { logout as logoutApi } from "./utils/api";
+import { logout as logoutApi, createProject, submitPreContext, submitInterview, generateReport, requestFeedbackApi } from "./utils/api";
 
 const INIT = {
   user: null,
@@ -199,50 +199,96 @@ export default function App() {
     });
   };
 
-  const genQuestions = () => {
+  const genQuestions = async () => {
     if (S.code.trim().length < 20) {
       upd({ error: "코드를 20자 이상 입력해주세요." });
       return;
     }
     upd({ loading: true, error: "" });
-    setTimeout(() => {
-      upd({ loading: false, questions: MOCK_QUESTIONS });
+    try {
+      const { sessionId } = await createProject({
+        memberId: S.user.memberId,
+        codeContent: S.code,
+        githubUrl: "",
+      });
+
+      const { questions } = await submitPreContext({
+        memberId: S.user.memberId,
+        sessionId,
+        codePurpose: S.ctx.intent,
+        techRationale: S.ctx.alt,
+        exceptionHandling: S.ctx.edge,
+        projectScale: S.ctx.scale ?? "",
+      });
+
+      upd({ loading: false, questions, sessionId });
       navigate("/step/3");
-    }, 1800);
+    } catch (e) {
+      upd({ loading: false, error: e.message });
+    }
   };
 
-  const genReport = () => {
-    const valid = S.answers.filter(
-      (a, i) => !S.skipped[i] && a.trim().length >= 10,
-    );
+  const genReport = async () => {
+    const valid = S.answers.filter((a, i) => !S.skipped[i] && a.trim().length >= 10);
     if (!valid.length) {
       upd({ error: "최소 1개 질문에 10자 이상 답변을 입력해주세요." });
       return;
     }
     upd({ loading: true, error: "" });
-    setTimeout(() => {
+    try {
+      const answers = S.questions.map((q, i) => ({
+        questionId: q.questionId,
+        answer: S.skipped[i] ? "" : S.answers[i],
+      }));
+
+      await submitInterview({
+        sessionId: S.sessionId,
+        memberId: S.user.memberId,
+        answers,
+      });
+
+      const { report, radarScore } = await generateReport({ sessionId: S.sessionId });
+
+      const radar = [
+        { label: "문제해결", val: radarScore.problemSolving },
+        { label: "기술 판단력", val: radarScore.techJudgment },
+        { label: "코드 신뢰성", val: radarScore.codeReliability },
+        { label: "커뮤니케이션", val: radarScore.communication },
+        { label: "설계 사고력", val: radarScore.designThinking },
+      ];
+
       const today = toISO(new Date());
       const h = loadHist(S.user?.email);
-      if (!h.includes(today)) {
-        h.push(today);
-        saveHist(S.user?.email, h);
-      }
-      upd({ loading: false, report: MOCK_REPORT, radar: MOCK_RADAR });
+      if (!h.includes(today)) { h.push(today); saveHist(S.user?.email, h); }
+
+      upd({ loading: false, report, radar });
       navigate("/step/4");
-    }, 2200);
+    } catch (e) {
+      upd({ loading: false, error: e.message });
+    }
   };
 
-  const requestFeedback = (i) => {
+  const requestFeedback = async (i) => {
     const fb = [...S.feedback];
     fb[i] = "loading";
     upd({ feedback: fb });
-    setTimeout(() => {
-      const fb2 = [...S.feedback],
-        ft = [...S.feedbackText];
+    try {
+      const questionId = S.questions[i].questionId;
+      const data = await requestFeedbackApi({
+        questionId,
+        memberId: S.user.memberId,
+        answer: S.answers[i],
+      });
+
+      const fb2 = [...S.feedback], ft = [...S.feedbackText];
       fb2[i] = "shown";
-      ft[i] = MOCK_FEEDBACK[i] || "";
+      ft[i] = data.feedback.improvement || "";
       upd({ feedback: fb2, feedbackText: ft });
-    }, 1300);
+    } catch (e) {
+      const fb2 = [...S.feedback];
+      fb2[i] = null;
+      upd({ feedback: fb2, error: e.message });
+    }
   };
 
   return (
