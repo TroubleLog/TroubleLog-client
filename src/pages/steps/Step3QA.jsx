@@ -139,27 +139,11 @@ export default function Step3QA({
   onSkip,
   onFeedback,
   onNext,
-  piiWarning, 
-  onClearPiiWarning,
 }) {
   const navigate = useNavigate();
 
   return (
     <div className="animate-fade-up">
-      {piiWarning && (
-        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
-          <div className="bg-s1 border border-white/[0.09] rounded-xl p-6 max-w-[380px] w-full mx-4">
-            <h3 className="text-[16px] font-semibold text-t1 mb-2">🔒 개인정보가 감지되었어요</h3>
-            <p className="text-[13px] text-t2 leading-relaxed mb-5">
-              입력하신 내용에 개인정보가 포함되어 있어 리포트를 생성할 수 없어요.<br/>
-              코드나 답변에서 개인정보를 제거한 후 다시 시도해주세요.
-            </p>
-            <button className="btn-primary w-full" onClick={onClearPiiWarning}>
-              확인
-            </button>
-          </div>
-        </div>
-      )}
       <div className="mb-8">
         <span className="sec-tag">
           <svg

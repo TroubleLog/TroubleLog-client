@@ -59,8 +59,14 @@ export async function createProject({ memberId, codeContent, githubUrl = "" }) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ memberId, codeContent, githubUrl }),
   });
-  if (!res.ok) throw new Error(await parseError(res));
-  return res.json();
+  
+  const data = await res.json();
+  
+  if (!res.ok) {
+    return data; // 400이든 뭐든 data 그대로 반환
+  }
+  
+  return data;
 }
 
 // 사전 컨텍스트 입력 + 질문 생성

@@ -121,6 +121,8 @@ function StepRoutes({
           }
           onSetError={(msg) => upd({ error: msg })}
           onNext={genQuestions}
+          piiWarning={S.piiWarning}
+          onClearPiiWarning={() => upd({ piiWarning: null })}
         />
       );
     case 3:
@@ -144,8 +146,6 @@ function StepRoutes({
           }}
           onFeedback={requestFeedback}
           onNext={genReport}
-          piiWarning={S.piiWarning}
-          onClearPiiWarning={() => upd({ piiWarning: null })}
         />
       );
     case 4:
@@ -210,11 +210,29 @@ export default function App() {
     }
     upd({ loading: true, error: "" });
     try {
-      const { sessionId } = await createProject({
+      const projectRes = await createProject({
         memberId: S.user.memberId,
         codeContent: S.code,
         githubUrl: "",
       });
+
+      if (projectRes.blockedReason) {
+        const typeMap = {
+          EMAIL: "이메일 주소",
+          PHONE_NUMBER: "전화번호",
+          PHONE: "전화번호",
+          SSN: "주민등록번호",
+          RESIDENT_REGISTRATION_NUMBER: "주민등록번호",
+        };
+        const detected = projectRes.warnings.map(w => typeMap[w.type] || w.type).join(', ');
+        upd({ 
+          loading: false, 
+          piiWarning: `코드에 개인정보(${detected})가 포함되어 있어요. 해당 정보를 제거한 후 다시 시도해주세요.` 
+        });
+        return;
+      }
+
+      const { sessionId } = projectRes;
 
       const { questions } = await submitPreContext({
         memberId: S.user.memberId,
@@ -245,16 +263,11 @@ export default function App() {
         answer: S.skipped[i] ? "" : S.answers[i],
       }));
 
-      const submitRes = await submitInterview({
+      await submitInterview({
         sessionId: S.sessionId,
         memberId: S.user.memberId,
         answers,
       });
-
-      if (!submitRes.reportGenerationReady) {
-        upd({ loading: false, piiWarning: submitRes.blockedReason || "개인정보가 감지되었습니다. 코드나 답변을 수정해주세요." });
-        return;
-      }
 
       const { report, radarScore } = await generateReport({ sessionId: S.sessionId });
 
