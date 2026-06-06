@@ -86,12 +86,7 @@ function Loading({ isReport }) {
 }
 
 function StepRoutes({
-  S,
-  upd,
-  genQuestions,
-  genReport,
-  requestFeedback,
-  restart,
+  S, upd, genQuestions, genReport, requestFeedback, restart, handleCodeNext,
 }) {
   const { step } = useParams();
   const location = useLocation();
@@ -109,6 +104,9 @@ function StepRoutes({
           error={S.error}
           onChange={(c) => upd({ code: c, error: "" })}
           onSetError={(msg) => upd({ error: msg })}
+          onNext={handleCodeNext}
+          piiWarning={S.piiWarning}
+          onClearPiiWarning={() => upd({ piiWarning: null })}
         />
       );
     case 2:
@@ -116,13 +114,9 @@ function StepRoutes({
         <Step2Context
           ctx={S.ctx}
           error={S.error}
-          onChange={(id, val) =>
-            upd({ ctx: { ...S.ctx, [id]: val }, error: "" })
-          }
+          onChange={(id, val) => upd({ ctx: { ...S.ctx, [id]: val }, error: "" })}
           onSetError={(msg) => upd({ error: msg })}
           onNext={genQuestions}
-          piiWarning={S.piiWarning}
-          onClearPiiWarning={() => upd({ piiWarning: null })}
         />
       );
     case 3:
@@ -203,47 +197,56 @@ export default function App() {
     });
   };
 
-  const genQuestions = async () => {
-    if (S.code.trim().length < 20) {
-      upd({ error: "코드를 20자 이상 입력해주세요." });
+  const handleCodeNext = async () => {
+  if (S.code.trim().length < 20) {
+    upd({ error: "코드를 20자 이상 입력해주세요." });
+    return;
+  }
+  upd({ loading: true, error: "" });
+  try {
+    const projectRes = await createProject({
+      memberId: S.user.memberId,
+      codeContent: S.code,
+      githubUrl: "",
+    });
+
+    if (projectRes.blockedReason) {
+      const typeMap = {
+        EMAIL: "이메일 주소",
+        PHONE_NUMBER: "전화번호",
+        PHONE: "전화번호",
+        SSN: "주민등록번호",
+        RESIDENT_REGISTRATION_NUMBER: "주민등록번호",
+        CREDIT_CARD: "신용카드 번호",
+        PASSWORD: "비밀번호",
+        API_KEY: "API 키",
+        DATABASE_PASSWORD: "데이터베이스 비밀번호",
+      };
+      const detected = projectRes.warnings.map(w => typeMap[w.type] || w.type).join(', ');
+      upd({ loading: false, piiWarning: `코드에 개인정보(${detected})가 포함되어 있어요. 해당 정보를 제거한 후 다시 시도해주세요.` });
       return;
     }
+
+    upd({ loading: false, sessionId: projectRes.sessionId });
+    navigate("/step/2");
+  } catch (e) {
+    upd({ loading: false, error: e.message });
+  }
+};
+
+  const genQuestions = async () => {
     upd({ loading: true, error: "" });
     try {
-      const projectRes = await createProject({
-        memberId: S.user.memberId,
-        codeContent: S.code,
-        githubUrl: "",
-      });
-
-      if (projectRes.blockedReason) {
-        const typeMap = {
-          EMAIL: "이메일 주소",
-          PHONE_NUMBER: "전화번호",
-          PHONE: "전화번호",
-          SSN: "주민등록번호",
-          RESIDENT_REGISTRATION_NUMBER: "주민등록번호",
-        };
-        const detected = projectRes.warnings.map(w => typeMap[w.type] || w.type).join(', ');
-        upd({ 
-          loading: false, 
-          piiWarning: `코드에 개인정보(${detected})가 포함되어 있어요. 해당 정보를 제거한 후 다시 시도해주세요.` 
-        });
-        return;
-      }
-
-      const { sessionId } = projectRes;
-
       const { questions } = await submitPreContext({
         memberId: S.user.memberId,
-        sessionId,
+        sessionId: S.sessionId,
         codePurpose: S.ctx.intent,
         techRationale: S.ctx.alt,
         exceptionHandling: S.ctx.edge,
         projectScale: S.ctx.scale ?? "",
       });
 
-      upd({ loading: false, questions, sessionId });
+      upd({ loading: false, questions });
       navigate("/step/3");
     } catch (e) {
       upd({ loading: false, error: e.message });
@@ -331,6 +334,7 @@ export default function App() {
                 genReport={genReport}
                 requestFeedback={requestFeedback}
                 restart={restart}
+                handleCodeNext={handleCodeNext}
               />
             }
           />

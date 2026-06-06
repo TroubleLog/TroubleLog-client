@@ -119,7 +119,7 @@ function LangDropdown({ value, onChange }) {
   );
 }
 
-export default function Step1Code({ code, error, onChange, onSetError }) {
+export default function Step1Code({ code, error, onChange, onSetError, onNext, piiWarning, onClearPiiWarning }) {
   const navigate = useNavigate();
   const [language, setLanguage] = useState("javascript");
 
@@ -129,16 +129,22 @@ export default function Step1Code({ code, error, onChange, onSetError }) {
   }, [language]);
 
   const handleNext = () => {
-    if (code.trim().length < 20) {
-      onSetError("코드를 20자 이상 입력해주세요.");
-      return;
-    }
-    onSetError("");
-    navigate("/step/2");
+    onNext();
   };
 
   return (
     <div className="animate-fade-up">
+      {piiWarning && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+          <div className="bg-s1 border border-white/[0.09] rounded-xl p-6 max-w-[380px] w-full mx-4">
+            <h3 className="text-[16px] font-semibold text-t1 mb-2">🔒 개인정보가 감지되었어요</h3>
+            <p className="text-[13px] text-t2 leading-relaxed mb-5">{piiWarning}</p>
+            <button className="btn-primary w-full" onClick={onClearPiiWarning}>
+              확인
+            </button>
+          </div>
+        </div>
+      )}
       <div className="mb-8">
         <span className="sec-tag">
           <svg
