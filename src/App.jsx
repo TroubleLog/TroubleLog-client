@@ -271,17 +271,18 @@ export default function App() {
 
       const { report, radarScore } = await generateReport({ sessionId: S.sessionId });
 
-      const radar = radarScore ? [
+      const radar = [
         { label: "문제해결", val: radarScore.problemSolving },
         { label: "기술 판단력", val: radarScore.techJudgment },
         { label: "코드 신뢰성", val: radarScore.codeReliability },
         { label: "커뮤니케이션", val: radarScore.communication },
         { label: "설계 사고력", val: radarScore.designThinking },
-      ] : null;
+      ];
 
       const today = toISO(new Date());
       const h = loadHist(S.user?.email);
-      if (!h.includes(today)) { h.push(today); saveHist(S.user?.email, h); }
+      h[today] = (h[today] || 0) + 1;
+      saveHist(S.user?.email, h);
 
       upd({ loading: false, report, radar });
       navigate("/step/4");
