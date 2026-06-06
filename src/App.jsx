@@ -30,7 +30,7 @@ import {
   seedHist,
   saveNickname,
 } from "./utils/history";
-import { logout as logoutApi, createProject, submitPreContext, submitInterview, generateReport, requestFeedbackApi } from "./utils/api";
+import { logout as logoutApi, createProject, submitPreContext, submitInterview, generateReport, submitAnswer } from "./utils/api";
 
 const INIT = {
   user: null,
@@ -275,7 +275,8 @@ export default function App() {
     upd({ feedback: fb });
     try {
       const questionId = S.questions[i].questionId;
-      const data = await requestFeedbackApi({
+      const data = await submitAnswer({
+        sessionId: S.sessionId,
         questionId,
         memberId: S.user.memberId,
         answer: S.answers[i],
@@ -283,7 +284,7 @@ export default function App() {
 
       const fb2 = [...S.feedback], ft = [...S.feedbackText];
       fb2[i] = "shown";
-      ft[i] = data.feedback.improvement || "";
+      ft[i] = data.improvement || "";
       upd({ feedback: fb2, feedbackText: ft });
     } catch (e) {
       const fb2 = [...S.feedback];

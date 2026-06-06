@@ -96,12 +96,12 @@ export async function generateReport({ sessionId }) {
 }
 
 // 피드백 요청
-export async function requestFeedbackApi({ questionId, memberId, answer }) {
-  const res = await fetch(`${BASE_URL}/api/interview/questions/${questionId}/feedback`, {
+export async function submitAnswer({ sessionId, questionId, memberId, answer }) {
+  const res = await fetch(`${BASE_URL}/api/projects/${sessionId}/answers/${questionId}`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ memberId, answer }),
   });
   if (!res.ok) throw new Error(await parseError(res));
-  return res.json();
+  return res.json(); // { answerId, improvement, warning }
 }
