@@ -23,3 +23,15 @@ export async function signup({ email, password, username }) {
 
   return res.json();
 }
+
+// 로그아웃
+export async function logout() {
+  const res = await fetch(`${BASE_URL}/api/members/logout`, {
+    method: "POST",
+    credentials: "include",
+  });
+
+  if (!res.ok) {
+    throw new Error(await parseError(res));
+  }
+}
