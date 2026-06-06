@@ -32,7 +32,9 @@ function QACard({
   onSkip,
   onFeedback,
 }) {
-  const badgeKey = BADGE_TYPE[q.type] || "tech";
+  const badge = BADGE_TYPE[q.questionSequence] || BADGE_TYPE[1];
+  const badgeKey = badge.key;
+  const badgeLabel = badge.label;
   const cnt = answer.length;
   const animClass =
     i === 0
@@ -48,10 +50,8 @@ function QACard({
       {/* Question */}
       <div className="px-6 py-5 border-b border-white/5">
         <div className="flex items-center gap-2 mb-2.5">
-          <span
-            className={`text-[12px] font-semibold px-2.5 py-0.5 rounded-full border ${BADGE_STYLE[badgeKey]}`}
-          >
-            {q.type}
+          <span className={`text-[12px] font-semibold px-2.5 py-0.5 rounded-full border ${BADGE_STYLE[badgeKey]}`}>
+  {badgeLabel}
           </span>
           <span className="text-[11px] text-t3 font-mono ml-auto">
             Q{i + 1}

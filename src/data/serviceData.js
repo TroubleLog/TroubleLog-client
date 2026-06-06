@@ -31,9 +31,9 @@ export const CTX_META = [
   },
 ];
 export const BADGE_TYPE = {
-  "기술 의사결정": "tech",
-  "트러블슈팅": "trouble",
-  "설계 의도": "intent",
+  1: { key: "tech", label: "기술 의사결정" },
+  2: { key: "trouble", label: "트러블슈팅" },
+  3: { key: "intent", label: "설계 의도" },
 };
 export const MOCK_CODE = `async function processOrder(orderId, userId) {
   const order = await db.orders.findById(orderId);
