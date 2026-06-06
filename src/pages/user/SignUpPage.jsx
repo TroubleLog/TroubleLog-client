@@ -57,7 +57,7 @@ export default function SignUpPage({ onRegister }) {
         password: pw,
         username: nick,
       });
-      onRegister(data.email, data.username);
+      onRegister(data.email, data.username, data.memberId);
       navigate("/step/1");
     } catch (e) {
       setErr(e.message || "회원가입에 실패했습니다. 다시 시도해주세요.");

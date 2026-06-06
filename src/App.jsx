@@ -163,16 +163,16 @@ export default function App() {
   const navigate = useNavigate();
   const upd = (p) => setS((prev) => ({ ...prev, ...p }));
 
-  const login = (email, nickname) => {
+  const login = (email, nickname, memberId) => {
     saveNickname(email, nickname);
     seedHist(email);
-    upd({ user: { email, nickname }, error: "" });
+    upd({ user: { email, nickname, memberId }, error: "" });
   };
 
-  const register = (email, nickname) => {
+  const register = (email, nickname, memberId) => {
     saveNickname(email, nickname);
     seedHist(email);
-    upd({ user: { email, nickname }, error: "" });
+    upd({ user: { email, nickname, memberId }, error: "" });
   };
 
   const logout = async () => {

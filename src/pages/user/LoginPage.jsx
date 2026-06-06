@@ -38,7 +38,7 @@ export default function LoginPage({ onLogin }) {
     setLoading(true);
     try {
       const data = await loginApi({ email, password: pw });
-      onLogin(data.email, data.username);
+      onLogin(data.email, data.username, data.memberId);
       navigate("/step/1");
     } catch (e) {
       setErr("이메일 또는 비밀번호가 일치하지 않습니다." || e.message);
