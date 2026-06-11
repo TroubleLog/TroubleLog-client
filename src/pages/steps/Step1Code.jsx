@@ -95,7 +95,7 @@ function LangDropdown({ value, onChange }) {
       {open && (
         <ul
           role="listbox"
-          className="absolute right-0 top-full mt-1 min-w-[120px] bg-s3 border border-white/[0.09] rounded-md py-1 shadow-lg z-10"
+          className="absolute right-0 top-full mt-1 min-w-[92px] bg-s3 border border-white/[0.09] rounded-md py-0 shadow-lg z-10"
         >
           {LANG_OPTIONS.map((opt) => (
             <li key={opt.id} role="option" aria-selected={opt.id === value}>
