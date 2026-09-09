@@ -1,0 +1,85 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@font-face {
+  font-family: "Pretendard";
+  src: url("./assets/fonts/PretendardVariable.ttf") format("truetype");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  --b0: rgba(255, 255, 255, 0.05);
+  --b1: rgba(255, 255, 255, 0.09);
+  --b2: rgba(255, 255, 255, 0.16);
+  --gd: rgba(34, 197, 94, 0.1);
+  --gd2: rgba(34, 197, 94, 0.2);
+  --rd: rgba(239, 68, 68, 0.1);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+html {
+  height: 100%;
+}
+body {
+  font-family: "Pretendard", "Outfit", system-ui, sans-serif;
+  background: #0b0b0d;
+  color: #ededf0;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+::selection {
+  background: var(--gd2);
+  color: #22c55e;
+}
+::-webkit-scrollbar {
+  width: 4px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #2c2c33;
+  border-radius: 2px;
+}
+
+textarea,
+input,
+button {
+  font-family: "Pretendard", "Outfit", system-ui, sans-serif;
+}
+
+@layer components {
+  .card {
+    @apply bg-s1 border border-white/5 rounded-lg p-6 transition-colors hover:border-white/[0.09];
+  }
+  .btn-primary {
+    @apply bg-accent text-white rounded-md px-5 py-2.5 text-[16px] font-bold cursor-pointer
+           transition-all hover:bg-[#1EAF52] hover:-translate-y-px active:translate-y-0
+           hover:shadow-[0_4px_16px_rgba(34,197,94,0.25)];
+  }
+  .btn-ghost {
+    @apply bg-s2 text-t2 border border-white/[0.09] rounded-md px-5 py-2.5 text-sm font-medium
+           cursor-pointer transition-all hover:bg-s3 hover:text-t1;
+  }
+  .field-input {
+    @apply w-full bg-s2 border border-white/[0.09] rounded-md px-3.5 py-2.5 text-sm text-t1
+           outline-none transition-colors focus:border-white/[0.22] placeholder:text-t3;
+  }
+  .sec-tag {
+    @apply inline-flex items-center gap-1.5 text-[11px] font-medium text-accent
+           bg-[var(--gd)] border border-accent/20 rounded-full px-3 py-1 mb-2.5;
+  }
+  .sec-title {
+    @apply text-[22px] font-semibold text-t1 tracking-tight mb-1.5;
+  }
+  .sec-sub {
+    @apply text-sm text-t2 leading-relaxed max-w-[800px];
+  }
+}
